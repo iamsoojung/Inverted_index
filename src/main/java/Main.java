@@ -26,10 +26,9 @@ public class Main {
 
         // 출력 정렬
         List<String> sortedInvertedIndex = sortInvertedIndex(originInvertedIndex);
-        System.out.println(sortedInvertedIndex);
 
         // 출력 파일 쓰기
-
+        writeOutputFile(outputFile, sortedInvertedIndex);
     }
 
     /**
@@ -106,6 +105,11 @@ public class Main {
         return words;
     }
 
+    /**
+     * 생성된 역색인을 조건에 맞게 정렬
+     * @param invertedIndex
+     * @return
+     */
     private static List<String> sortInvertedIndex(Map<String, Map<Integer, Integer>> invertedIndex) {
         List<String> sortedInvertedIndex = new ArrayList<>();
 
@@ -126,5 +130,14 @@ public class Main {
                 });
 
         return sortedInvertedIndex;
+    }
+
+    /**
+     * 정렬된 역색인 결과값을, 결과 파일로 쓰기
+     * @param filePath
+     * @param sortedInvertedIndex
+     */
+    private static void writeOutputFile(String filePath, List<String> sortedInvertedIndex) throws IOException {
+        Files.write(Paths.get(filePath), sortedInvertedIndex);
     }
 }
