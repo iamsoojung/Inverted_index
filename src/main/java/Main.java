@@ -46,6 +46,7 @@ public class Main {
 
     /**
      * 입력 파일 읽어서, 라인 단위로 반환함
+     *
      * @param filePath
      * @return
      */
@@ -62,15 +63,16 @@ public class Main {
 
     /**
      * 라인 별로 문서아이디와 텍스트 분리 후, 역색인 생성
+     *
      * @param lines
      * @return
      */
-    private static Map<String, Map<Integer, Integer>> createInvertedIndex (List<String> lines) {
+    private static Map<String, Map<Integer, Integer>> createInvertedIndex(List<String> lines) {
         Map<String, Map<Integer, Integer>> invertedIndex = new HashMap<>();     // 역색인 맵
 
         for (String line : lines) {
             String[] parts = line.split(" ", 2);    //공백 기준으로 ID, 텍스트 분리
-            if (parts.length != 2)  continue;   // 포맷 이상하면 continue
+            if (parts.length != 2) continue;   // 포맷 이상하면 continue
 
             int docId = Integer.parseInt(parts[0]);     // 문서 ID
             List<String> words = processTextByString(parts[1]);    // 텍스트 (단어 추출하여 분리)
@@ -93,6 +95,7 @@ public class Main {
     /**
      * 입력된 텍스트를 전처리하여 단어 추출
      * (특수문자 제거 & 알파벳으로만 이루어진 단어 추출 & 소문자 변환)
+     *
      * @param text 입력된 원본 텍스트
      * @return 전처리된 단어 리스트
      */
@@ -131,15 +134,16 @@ public class Main {
 
     /**
      * 생성된 역색인을 조건에 맞게 정렬
+     *
      * @param invertedIndex
      * @return
      */
     private static List<String> sortInvertedIndex(Map<String, Map<Integer, Integer>> invertedIndex) {
         List<String> sortedInvertedIndex = new ArrayList<>();
 
-        invertedIndex.entrySet().stream()
+        invertedIndex.entrySet().parallelStream()
                 .sorted(Map.Entry.comparingByKey())     // 1) 단어 ASC
-                .forEach(entry -> {
+                .forEachOrdered(entry -> {
                     String word = entry.getKey();
                     Map<Integer, Integer> docFreqMap = entry.getValue();
 
@@ -158,6 +162,7 @@ public class Main {
 
     /**
      * 정렬된 역색인 결과값을, 결과 파일로 쓰기
+     *
      * @param filePath
      * @param sortedInvertedIndex
      */
