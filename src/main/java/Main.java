@@ -77,7 +77,7 @@ public class Main {
             return new ArrayList<>();
         }
 
-        Pattern pattern = Pattern.compile("\\b[a-zA-Z]+\\b");   // 정규식 패턴 생성
+        Pattern pattern = Pattern.compile("\\b[a-zA-Z0-9]+\\b");   // 정규식 패턴 생성
         Matcher matcher = pattern.matcher(text.toLowerCase());  // 소문자 변환 후 정규식 매칭
 
         List<String> words = new ArrayList<>();
