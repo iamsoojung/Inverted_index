@@ -22,15 +22,15 @@ public class Main {
         List<String> lines = readInputFile(inputFile);
 
         // 역색인 생성
-        Map<String, Map<Integer, Integer>> invertedIndex = createInvertedIndex(lines);
-        System.out.println(invertedIndex.toString());
+        Map<String, Map<Integer, Integer>> originInvertedIndex = createInvertedIndex(lines);
 
         // 출력 정렬
+        List<String> sortedInvertedIndex = sortInvertedIndex(originInvertedIndex);
+        System.out.println(sortedInvertedIndex);
 
         // 출력 파일 쓰기
 
     }
-
 
     /**
      * 입력 파일 읽어서, 라인 단위로 반환함
@@ -104,5 +104,27 @@ public class Main {
             }
         }
         return words;
+    }
+
+    private static List<String> sortInvertedIndex(Map<String, Map<Integer, Integer>> invertedIndex) {
+        List<String> sortedInvertedIndex = new ArrayList<>();
+
+        invertedIndex.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())     // 1) 단어 ASC
+                .forEach(entry -> {
+                    String word = entry.getKey();
+                    Map<Integer, Integer> docFreqMap = entry.getValue();
+
+                    StringBuilder line = new StringBuilder(word);
+                    docFreqMap.entrySet().stream()
+                            .sorted((e1, e2) -> {
+                                int freqCompare = Integer.compare(e2.getValue(), e1.getValue());    // 2) 단어 빈도수 DESC
+                                return freqCompare != 0 ? freqCompare : Integer.compare(e1.getKey(), e2.getKey());  // 3) 문서 ID ASC
+                            })
+                            .forEach(e -> line.append(" ").append(e.getKey()).append(" ").append(e.getValue()));
+                    sortedInvertedIndex.add(line.toString());
+                });
+
+        return sortedInvertedIndex;
     }
 }
