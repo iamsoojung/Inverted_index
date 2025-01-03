@@ -11,6 +11,10 @@ import java.util.regex.Pattern;
 public class Main {
 
     public static void main(String[] args) throws IOException {
+
+        // 코드 실행 start
+        long beforeTime = System.currentTimeMillis();
+
         if (args.length != 3 || !"index".equalsIgnoreCase(args[0])) {
             System.out.println("Command 틀림 ;; java <className> index <inputFile> <outputFile> !!! ");
         }
@@ -29,6 +33,11 @@ public class Main {
 
         // 출력 파일 쓰기
         writeOutputFile(outputFile, sortedInvertedIndex);
+
+        // 코드 실행 end
+        long afterTime = System.currentTimeMillis();
+
+        System.out.println("프로그램 실행 시간(ms) : " + (afterTime - beforeTime));
     }
 
     /**
@@ -54,7 +63,7 @@ public class Main {
             if (parts.length != 2)  continue;   // 포맷 이상하면 continue
 
             int docId = Integer.parseInt(parts[0]);     // 문서 ID
-            List<String> words = processTextByPattern(parts[1]);    // 텍스트 (단어 추출하여 분리)
+            List<String> words = processTextByString(parts[1]);    // 텍스트 (단어 추출하여 분리)
 
             for (String word : words) {
                 Map<Integer, Integer> docMap = invertedIndex.getOrDefault(word, new HashMap<>());   // 역색인에 없는 단어면 새 맵 추가
@@ -90,7 +99,7 @@ public class Main {
     /**
      * Pattern 클래스 대신 String 클래스로 전처리
      */
-    private static List<String> processText(String text) {
+    private static List<String> processTextByString(String text) {
         if (text == null || text.isEmpty()) {
             return new ArrayList<>();
         }
