@@ -17,6 +17,7 @@ public class Main {
 
         if (args.length != 3 || !"index".equalsIgnoreCase(args[0])) {
             System.out.println("Command 틀림 ;; java <className> index <inputFile> <outputFile> !!! ");
+            return;
         }
 
         String inputFile = args[1];
