@@ -108,7 +108,7 @@ public class Main {
 
         List<String> words = new ArrayList<>();
         for (String word : splitWords) {
-            if (!words.isEmpty()) {
+            if (!word.isEmpty()) {
                 words.add(word);
             }
         }
