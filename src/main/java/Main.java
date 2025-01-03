@@ -1,3 +1,6 @@
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -5,7 +8,7 @@ import java.util.regex.Pattern;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         if (args.length != 3 || !"index".equalsIgnoreCase(args[0])) {
             System.out.println("Command 틀림 ;; java <className> index <inputFile> <outputFile> !!! ");
         }
@@ -14,9 +17,24 @@ public class Main {
         String outputFile = args[2];
 
         // To do : 로직 처리 필요
+        List<String> lines = readInputFile(inputFile);
+        for (String line : lines) {
+            System.out.println(processTextByPattern(line));
+        }
 
     }
 
+
+    /**
+     * 입력 파일 읽어서, 라인 단위로 반환함
+     *
+     * @param filePath
+     * @return
+     * @throws IOException
+     */
+    private static List<String> readInputFile(String filePath) throws IOException {
+        return Files.readAllLines(Paths.get(filePath));
+    }
 
 
     /**
