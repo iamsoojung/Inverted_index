@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Main {
 
@@ -45,10 +47,16 @@ public class Main {
      * 입력 파일 읽어서, 라인 단위로 반환함
      * @param filePath
      * @return
-     * @throws IOException
      */
-    private static List<String> readInputFile(String filePath) throws IOException {
-        return Files.readAllLines(Paths.get(filePath));
+    private static List<String> readInputFile(String filePath) {
+        try {
+            try (Stream<String> stream = Files.lines(Paths.get(filePath))) {
+                return stream.collect(Collectors.toList());
+            }
+        } catch (IOException e) {
+            System.err.println("파일이 없거나 읽을 수 없네요...ㅠ : " + e.getMessage());
+            throw e;
+        }
     }
 
     /**
