@@ -1,5 +1,3 @@
-package org.example;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -8,7 +6,15 @@ import java.util.regex.Pattern;
 public class Main {
 
     public static void main(String[] args) {
-        System.out.println(processTextByPattern("apple a a what???").toString());
+        if (args.length != 3 || !"index".equalsIgnoreCase(args[0])) {
+            System.out.println("Command 틀림 ;; java <className> index <inputFile> <outputFile> !!! ");
+        }
+
+        String inputFile = args[1];
+        String outputFile = args[2];
+
+        // To do : 로직 처리 필요
+
     }
 
 
