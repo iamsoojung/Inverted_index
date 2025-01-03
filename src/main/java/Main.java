@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -50,13 +51,13 @@ public class Main {
      */
     private static List<String> readInputFile(String filePath) {
         try {
-            try (Stream<String> stream = Files.lines(Paths.get(filePath))) {
-                return stream.collect(Collectors.toList());
+            try (Stream<String> lines = Files.lines(Paths.get(filePath))) {
+                return lines.collect(Collectors.toList());
             }
         } catch (IOException e) {
             System.err.println("파일이 없거나 읽을 수 없네요...ㅠ : " + e.getMessage());
-            throw e;
         }
+        return null;
     }
 
     /**
@@ -75,9 +76,14 @@ public class Main {
             List<String> words = processTextByString(parts[1]);    // 텍스트 (단어 추출하여 분리)
 
             for (String word : words) {
-                Map<Integer, Integer> docMap = invertedIndex.getOrDefault(word, new HashMap<>());   // 역색인에 없는 단어면 새 맵 추가
-                docMap.put(docId, docMap.getOrDefault(docId, 0) + 1);   // 문서 ID의 빈도 업데이트
-                invertedIndex.put(word, docMap);    // 역색인에 저장
+                // 기존 (put 반복 사용)
+//                Map<Integer, Integer> docMap = invertedIndex.getOrDefault(word, new HashMap<>());   // 역색인에 없는 단어면 새 맵 추가
+//                docMap.put(docId, docMap.getOrDefault(docId, 0) + 1);   // 문서 ID의 빈도 업데이트
+//                invertedIndex.put(word, docMap);    // 역색인에 저장
+
+                // computeIfAbsent, merge 사용
+                invertedIndex.computeIfAbsent(word, k -> new ConcurrentHashMap<>())
+                        .merge(docId, 1, Integer::sum);
             }
         }
 
