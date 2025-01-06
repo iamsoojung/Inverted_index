@@ -1,9 +1,7 @@
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -15,15 +13,40 @@ import java.util.stream.Stream;
 
 public class Main {
 
+    private static final Map<String, Map<Integer, Integer>> invertedIndex = new ConcurrentHashMap<>();
+
     public static void main(String[] args) throws IOException {
-        if (args.length != 3 || !"index".equalsIgnoreCase(args[0])) {
-            System.out.println("Command 틀림 ;; java <className> index <inputFile> <outputFile> !!! ");
+        if (args.length < 2) {
+            System.out.println("명령어 틀림;; java Main <index|search> [추가 인자들]");
             return;
         }
 
-        String inputFile = args[1];
-        String outputFile = args[2];
+        String mode = args[0];
 
+        if ("index".equalsIgnoreCase(mode)) {   // 색인 모드
+            if (args.length != 3) {
+                System.out.println("땡~! java Main index <inputFile> <outputFile>");
+                return;
+            }
+            String inputFile = args[1];
+            String outputFile = args[2];
+            runIndexing(inputFile, outputFile);
+        } else if ("search".equalsIgnoreCase(mode)) {   // 검색 모드
+            if (args.length < 3) {
+                System.out.println("땡~! java Main search <indexFile> <query>");
+                return;
+            }
+            String indexFile = args[1];
+            String query = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
+            runSearch(indexFile, query);
+        } else {
+            System.out.println("이게 무슨 모드에요? " + mode + "?? 뭐임?");
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private static void runIndexing(String inputFile, String outputFile) throws IOException {
         // 프로그램 실행 시간 측정 시작
         long programStartTime = System.currentTimeMillis();
 
@@ -35,13 +58,13 @@ public class Main {
 
         // 역색인 생성
         startTime = System.currentTimeMillis();
-        Map<String, Map<Integer, Integer>> originInvertedIndex = createInvertedIndex(lines);
+        invertedIndex.putAll(createInvertedIndex(lines));
         long indexingTime = System.currentTimeMillis() - startTime;
         System.out.println("2) 역색인 생성 시간(ms): " + indexingTime);
 
         // 출력 정렬
         startTime = System.currentTimeMillis();
-        List<String> sortedInvertedIndex = sortInvertedIndex(originInvertedIndex);
+        List<String> sortedInvertedIndex = sortInvertedIndex(invertedIndex);
         long sortingTime = System.currentTimeMillis() - startTime;
         System.out.println("3) 정렬 시간(ms): " + sortingTime);
 
@@ -56,6 +79,13 @@ public class Main {
         System.out.println("### 전체 실행 시간(ms): " + (programEndTime - programStartTime));
         System.out.println("### 평균 실행 시간(ms): " + (readInputTime + indexingTime + sortingTime + writingTime)/4.0);
     }
+
+    private static void runSearch(String outputFile, String query) {
+        // 검색 모드
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // 색인 로직 구현
 
     /**
      * 입력 파일 읽어서, 라인 단위로 반환함
@@ -182,5 +212,12 @@ public class Main {
      */
     private static void writeOutputFile(String filePath, List<String> sortedInvertedIndex) throws IOException {
         Files.write(Paths.get(filePath), sortedInvertedIndex);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // 검색 로직 구현
+
+    private static List<Integer> search(String query) {
+        return null;
     }
 }
