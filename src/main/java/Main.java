@@ -80,12 +80,20 @@ public class Main {
         System.out.println("### 평균 실행 시간(ms): " + (readInputTime + indexingTime + sortingTime + writingTime)/4.0);
     }
 
-    private static void runSearch(String outputFile, String query) {
-        // 검색 모드
+    private static void runSearch(String indexFile, String query) throws IOException {
+        List<String> lines = readInputFile(indexFile);
+        if (lines == null) return;
+
+        Map<String, Map<Integer, Integer>> loadedIndex = loadInvertedIndex(lines);
+
+        List<Integer> result = search(loadedIndex, query);
+
+        System.out.println("검색 결과: " + (result.isEmpty() ? "결과 없음" : result));
     }
 
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // 색인 로직 구현
+    /* 색인 로직 구현 */
 
     /**
      * 입력 파일 읽어서, 라인 단위로 반환함
@@ -214,10 +222,99 @@ public class Main {
         Files.write(Paths.get(filePath), sortedInvertedIndex);
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // 검색 로직 구현
 
-    private static List<Integer> search(String query) {
-        return null;
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /* 검색 로직 구현 */
+
+    /**
+     * 지정한 inverted index 불러오기
+     * @param lines
+     * @return inverted_index
+     */
+    private static Map<String, Map<Integer, Integer>> loadInvertedIndex(List<String> lines) {
+        Map<String, Map<Integer, Integer>> index = new HashMap<>();
+
+        for (String line : lines) {
+            String[] parts = line.split(" ");
+            if (parts.length < 2) continue;
+
+            String word = parts[0];
+            Map<Integer, Integer> docFreqMap = new HashMap<>();
+
+            for (int i = 1; i < parts.length; i += 2) {
+                int docId = Integer.parseInt(parts[i]);
+                int freq = Integer.parseInt(parts[i + 1]);
+                docFreqMap.put(docId, freq);
+            }
+            index.put(word, docFreqMap);
+        }
+        return index;
+    }
+
+    /**
+     * 지정된 inverted index 로부터 지정한 단어를 케이스별로 검색
+     * @param index
+     * @param query
+     * @return 각 케이스에 적절한 메서드 호출 (AND 연산, OR 연산, 단일 연산)
+     */
+    private static List<Integer> search(Map<String, Map<Integer, Integer>> index, String query) {
+        if (query.contains(" AND ")) {  // AND 연산 처리
+            String[] words = query.split(" AND ");
+            return processAndQuery(index, words[0].trim(), words[1].trim());
+        } else if (query.contains(" OR ")) {    // OR 연산 처리
+            String[] words = query.split(" OR ");
+            return processOrQuery(index, words[0].trim(), words[1].trim());
+        } else {    // 단일 연산
+            return processSingleQuery(index, query.trim());
+        }
+    }
+
+    /**
+     * AND 키워드에 따른 단어 검색 모드
+     * @param index
+     * @param word1
+     * @param word2
+     * @return
+     */
+    private static List<Integer> processAndQuery(Map<String, Map<Integer, Integer>> index, String word1, String word2) {
+        List<Integer> result1 = processSingleQuery(index, word1);
+        List<Integer> result2 = processSingleQuery(index, word2);
+
+        result1.retainAll(result2);     // 교집합
+        return result1;
+    }
+
+    /**
+     * OR 키워드에 따른 단어 검색 모드
+     * @param index
+     * @param word1
+     * @param word2
+     * @return
+     */
+    private static List<Integer> processOrQuery(Map<String, Map<Integer, Integer>> index, String word1, String word2) {
+        List<Integer> result1 = processSingleQuery(index, word1);
+        List<Integer> result2 = processSingleQuery(index, word2);
+
+        Set<Integer> resultSet = new HashSet<>(result1);    // 합집합
+        resultSet.addAll(result2);
+
+        List<Integer> result = new ArrayList<>(resultSet);      // 재정렬
+        Collections.sort(result);
+        return result;
+    }
+
+    /**
+     * 단일 단어 검색 모드
+     * @param index
+     * @param word
+     * @return
+     */
+    private static List<Integer> processSingleQuery(Map<String, Map<Integer, Integer>> index, String word) {
+        Map<Integer, Integer> docFreqMap = index.get(word);
+        if (docFreqMap == null)     return Collections.emptyList();
+        
+        List<Integer> result = new ArrayList<>(docFreqMap.keySet());    // 정렬
+        Collections.sort(result);
+        return result;
     }
 }
