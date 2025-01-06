@@ -8,6 +8,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -55,6 +57,11 @@ public class Main {
         System.out.println("### 평균 실행 시간(ms): " + (readInputTime + indexingTime + sortingTime + writingTime)/4.0);
     }
 
+    /**
+     * 입력 파일 읽어서, 라인 단위로 반환함
+     * @param filePath
+     * @return 라인 단위 텍스트
+     */
     private static List<String> readInputFile(String filePath) {
         try {
             try (Stream<String> lines = Files.lines(Paths.get(filePath))) {
@@ -66,6 +73,11 @@ public class Main {
         return null;
     }
 
+    /**
+     * 라인 별로 문서아이디와 텍스트 분리 후, 역색인 생성
+     * @param lines
+     * @return 역색인
+     */
     private static Map<String, Map<Integer, Integer>> createInvertedIndex(List<String> lines) {
         Map<String, Map<Integer, Integer>> invertedIndex = new ConcurrentHashMap<>();
 
@@ -97,6 +109,30 @@ public class Main {
         return invertedIndex;
     }
 
+    /**
+     * 입력된 텍스트를 전처리하여 단어 추출
+     * (특수문자 제거 & 알파벳으로만 이루어진 단어 추출 & 소문자 변환)
+     * @param text 입력된 원본 텍스트
+     * @return 전처리된 단어 리스트
+     */
+    private static List<String> processTextByPattern(String text) {
+        if (text == null || text.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        Pattern pattern = Pattern.compile("\\b[a-zA-Z0-9]+\\b");   // 정규식 패턴 생성
+        Matcher matcher = pattern.matcher(text.toLowerCase());  // 소문자 변환 후 정규식 매칭
+
+        List<String> words = new ArrayList<>();
+        while (matcher.find()) {    // 정규식에 일치하는 단어 찾기
+            words.add(matcher.group()); // 찾은 단어 추가
+        }
+        return words;
+    }
+
+    /**
+     * Pattern 클래스 대신 String 클래스로 전처리
+     */
     private static List<String> processTextByString(String text) {
         if (text == null || text.isEmpty()) {
             return new ArrayList<>();
@@ -112,6 +148,11 @@ public class Main {
         return words;
     }
 
+    /**
+     * 생성된 역색인을 조건에 맞게 정렬
+     * @param invertedIndex
+     * @return 정렬된 역색인
+     */
     private static List<String> sortInvertedIndex(Map<String, Map<Integer, Integer>> invertedIndex) {
         List<String> sortedInvertedIndex = new ArrayList<>();
 
@@ -134,6 +175,11 @@ public class Main {
         return sortedInvertedIndex;
     }
 
+    /**
+     * 정렬된 역색인 결과값을, 결과 파일로 쓰기
+     * @param filePath
+     * @param sortedInvertedIndex
+     */
     private static void writeOutputFile(String filePath, List<String> sortedInvertedIndex) throws IOException {
         Files.write(Paths.get(filePath), sortedInvertedIndex);
     }
