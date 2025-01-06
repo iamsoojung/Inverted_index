@@ -137,7 +137,7 @@ public class Main {
         if (text == null || text.isEmpty()) {
             return new ArrayList<>();
         }
-        String[] splitWords = text.toLowerCase().split("[^a-zA-Z]+");
+        String[] splitWords = text.toLowerCase().split("[^a-zA-Z0-9]+");
 
         List<String> words = new ArrayList<>();
         for (String word : splitWords) {
